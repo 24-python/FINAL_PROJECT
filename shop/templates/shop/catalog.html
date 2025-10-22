@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Каталог цветов</h2>
+<div class="row">
+    {% for product in products %}
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            {% if product.image %}
+                <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+            {% else %}
+                <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                    <span>Нет изображения</span>
+                </div>
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ product.name }}</h5>
+                <p class="card-text">{{ product.description|truncatewords:20 }}</p>
+                <p class="card-text"><strong>{{ product.price }} ₽</strong></p>
+                <a href="{% url 'shop:product_detail' product.pk %}" class="btn btn-primary">Подробнее</a>
+                <a href="{% url 'shop:add_to_cart' product.pk %}" class="btn btn-success me-1">В корзину</a>
+                <a href="{% url 'shop:quick_add_to_cart' product.pk %}" class="btn btn-warning">Быстрый заказ</a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+        <p>Нет доступных товаров.</p>
+    {% endfor %}
+</div>
+{% endblock %}

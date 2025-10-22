@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>История заказов</h2>
+{% if orders %}
+    {% for order in orders %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Заказ #{{ order.id }}</h5>
+                <p class="card-text">Статус: {{ order.get_status_display }}</p>
+                <p class="card-text">Дата: {{ order.created_at }}</p>
+                <p class="card-text">Адрес: {{ order.delivery_address }}</p>
+                <p class="card-text">Телефон: {{ order.delivery_phone }}</p>
+                <p class="card-text">Итого: {{ order.total_price }} ₽</p>
+                <a href="#" class="btn btn-primary me-2">Подробнее</a>
+                <!-- Кнопка "Повторить заказ" -->
+                <a href="{% url 'shop:repeat_order' order.id %}" class="btn btn-secondary">Повторить заказ</a>
+            </div>
+        </div>
+    {% endfor %}
+{% else %}
+    <p>У вас пока нет заказов.</p>
+{% endif %}
+{% endblock %}
