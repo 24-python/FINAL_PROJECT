@@ -35,16 +35,20 @@ class CustomLoginView(LoginView):
 
     # --- Изменение: переопределяем get_success_url ---
     def get_success_url(self):
-        # Убедимся, что пользователь аутентифицирован
-        if self.request.user.is_authenticated:
-            # Перенаправляем на главную страницу каталога
+        # Проверяем, является ли вошедший пользователь суперпользователем
+        if self.request.user.is_superuser:
+            # Перенаправляем в админ-панель
+            return reverse_lazy('admin:index')
+        else:
+            # Для обычных пользователей - на главную страницу каталога
             return reverse_lazy('shop:catalog')
-        # На всякий случай, если что-то пошло не так
-        return reverse_lazy('shop:catalog') # или settings.LOGIN_REDIRECT_URL, если определен
 
     def form_valid(self, form):
+        # Вызываем стандартное поведение
+        response = super().form_valid(form)
+        # Добавляем сообщение после успешного входа
         messages.success(self.request, "Вы успешно вошли в систему.")
-        return super().form_valid(form)
+        return response
 
     def form_invalid(self, form):
         messages.error(self.request, "Ошибка входа. Проверьте email и пароль.")

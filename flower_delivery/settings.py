@@ -42,6 +42,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                # --- Добавляем наш процессор ---
                 'shop.context_processors.cart_count',
             ],
         },
@@ -57,6 +58,14 @@ DATABASES = {
     }
 }
 
+# --- АУТЕНТИФИКАЦИЯ ---
+# Указываем кастомные бэкенды аутентификации
+AUTHENTICATION_BACKENDS = [
+    'accounts.backends.EmailBackend', # Наш бэкенд (вход по email)
+    'django.contrib.auth.backends.ModelBackend', # Стандартный бэкенд (вход по username)
+]
+# --- /АУТЕНТИФИКАЦИЯ ---
+
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -64,10 +73,12 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-LANGUAGE_CODE = 'ru-ru'
+# --- ЯЗЫК И ВРЕМЕННАЯ ЗОНА ---
+LANGUAGE_CODE = 'ru-ru'  # <-- Изменено на русский
 TIME_ZONE = 'Europe/Moscow'
-USE_I18N = True
+USE_I18N = True  # <-- Включено для поддержки перевода
 USE_TZ = True
+# --- /ЯЗЫК И ВРЕМЕННАЯ ЗОНА ---
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
