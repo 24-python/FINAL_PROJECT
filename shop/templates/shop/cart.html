@@ -28,7 +28,14 @@
             </tr>
         </tfoot>
     </table>
-    <a href="{% url 'shop:checkout' %}" class="btn btn-success">Оформить заказ</a>
+    <!-- --- НОВАЯ кнопка "Оплатить" --- -->
+    <form method="post" action="{% url 'shop:initiate_payment' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-success">Оплатить</button>
+    </form>
+    <!-- --- /НОВАЯ кнопка "Оплатить" --- -->
+    <!-- Кнопка "Оформить заказ" остаётся, если хочется использовать старую логику -->
+    <a href="{% url 'shop:checkout' %}" class="btn btn-primary mt-2">Оформить заказ</a>
 {% else %}
     <p>Ваша корзина пуста.</p>
 {% endif %}

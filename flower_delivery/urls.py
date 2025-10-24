@@ -7,9 +7,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('shop.urls')),
     path('accounts/', include('accounts.urls')),
-    path('analytics/', include('analytics.urls')),
+    # path('analytics/', include('analytics.urls')), # Закомментируйте или удалите, если analytics.urls пустой или не нужен
 ]
 
-# Только в режиме DEBUG (разработки)
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -80,6 +80,19 @@ USE_I18N = True  # <-- Включено для поддержки перевод
 USE_TZ = True
 # --- /ЯЗЫК И ВРЕМЕННАЯ ЗОНА ---
 
+# --- EMAIL (Yandex) ---
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+# Замените 'your_yandex_email@yandex.ru' на ваш реальный адрес
+EMAIL_HOST_USER = 'wotbotov@yandex.com'  # Ваш email на Yandex
+# Вместо обычного пароля используйте "Пароль приложения"
+# или "Специальный пароль" (в зависимости от настроек безопасности Yandex)
+EMAIL_HOST_PASSWORD = 'your_yandex_app_password' # Пароль приложения
+DEFAULT_FROM_EMAIL = 'your_yandex_email@yandex.ru'
+# --- /EMAIL ---
+
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'

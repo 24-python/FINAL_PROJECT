@@ -29,13 +29,23 @@ class Order(models.Model):
         ('cancelled', 'Отменен'),
     ]
 
+    PAYMENT_STATUS_CHOICES = [
+        ('pending', 'Ожидает оплаты'),
+        ('paid', 'Оплачено'),
+        ('failed', 'Платёж не прошёл'),
+        ('cancelled', 'Платёж отменён'),
+    ]
+
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Пользователь")
     products = models.ManyToManyField(Product, through='OrderItem', verbose_name="Товары")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new', verbose_name="Статус")
+    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='pending', verbose_name="Статус оплаты")
     created_at = models.DateTimeField(default=timezone.now, verbose_name="Дата заказа")
     delivery_address = models.TextField(verbose_name="Адрес доставки")
     delivery_phone = models.CharField(max_length=20, verbose_name="Телефон")
-    delivery_date = models.DateTimeField(verbose_name="Дата доставки")
+    # --- ИЗМЕНЕНО: blank=True, null=True ---
+    delivery_date = models.DateTimeField(verbose_name="Дата доставки", blank=True, null=True)
+    # --- /ИЗМЕНЕНО ---
     total_price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Итоговая цена")
 
     def __str__(self):

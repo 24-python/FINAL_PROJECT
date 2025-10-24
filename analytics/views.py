@@ -1,14 +1,20 @@
 from django.shortcuts import render
+# from .models import OrderAnalytics # УДАЛЕНО
+from .models import SalesReport # ДОБАВЛЕНО
 from django.contrib.auth.decorators import user_passes_test
-from .models import OrderAnalytics
-from shop.models import Order
 
 @user_passes_test(lambda u: u.is_staff)
 def analytics_dashboard(request):
-    orders = Order.objects.all()
-    total_revenue = sum(float(o.total_price) for o in orders)
-    new_orders = orders.filter(status='new').count()
-    return render(request, 'analytics/dashboard.html', {
+    # Пример: получить все отчёты
+    reports = SalesReport.objects.all().order_by('-date')
+    total_revenue = sum(r.revenue for r in reports)
+    total_expenses = sum(r.expenses for r in reports)
+    net_profit = total_revenue - total_expenses
+
+    context = {
+        'reports': reports,
         'total_revenue': total_revenue,
-        'new_orders': new_orders,
-    })
+        'total_expenses': total_expenses,
+        'net_profit': net_profit,
+    }
+    return render(request, 'analytics/dashboard.html', context)

@@ -7,10 +7,14 @@ class OrderItemInline(admin.TabularInline):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ['id', 'user', 'status', 'created_at', 'total_price']
-    list_filter = ['status', 'created_at']
+    # --- Добавлен payment_status ---
+    list_display = ['id', 'user', 'status', 'payment_status', 'created_at', 'total_price']
+    list_filter = ['status', 'payment_status', 'created_at']
+    # --- /Добавлен payment_status ---
     inlines = [OrderItemInline]
-    fields = ['user', 'status', 'created_at', 'delivery_address', 'delivery_phone', 'delivery_date', 'total_price']
+    # --- Добавлено поле payment_status ---
+    fields = ['user', 'status', 'payment_status', 'created_at', 'delivery_address', 'delivery_phone', 'delivery_date', 'total_price']
+    # --- /Добавлено поле payment_status ---
     readonly_fields = ['created_at', 'total_price']
 
 admin.site.register(Product)

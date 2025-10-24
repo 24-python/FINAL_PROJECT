@@ -5,6 +5,14 @@
 <form method="post">
     {% csrf_token %}
     <div class="mb-3">
+        <label for="{{ form.first_name.id_for_label }}" class="form-label">Имя</label>
+        {{ form.first_name }}
+    </div>
+    <div class="mb-3">
+        <label for="{{ form.last_name.id_for_label }}" class="form-label">Фамилия</label>
+        {{ form.last_name }}
+    </div>
+    <div class="mb-3">
         <label for="{{ form.phone.id_for_label }}" class="form-label">Телефон</label>
         {{ form.phone }}
     </div>
@@ -14,4 +22,7 @@
     </div>
     <button type="submit" class="btn btn-primary">Сохранить изменения</button>
 </form>
+
+<!-- Ссылка на смену пароля -->
+<a href="{% url 'accounts:password_change' %}" class="btn btn-secondary mt-2">Изменить пароль</a>
 {% endblock %}
