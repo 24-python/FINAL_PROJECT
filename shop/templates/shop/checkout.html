@@ -2,20 +2,59 @@
 
 {% block content %}
 <h2>Оформление заказа</h2>
-<form method="post">
+<form method="post" id="checkout-form">
     {% csrf_token %}
     <div class="mb-3">
         <label for="{{ form.delivery_address.id_for_label }}" class="form-label">Адрес доставки</label>
         {{ form.delivery_address }}
+        {% if form.delivery_address.errors %}
+            <div class="alert alert-danger mt-1">{{ form.delivery_address.errors }}</div>
+        {% endif %}
     </div>
     <div class="mb-3">
         <label for="{{ form.delivery_phone.id_for_label }}" class="form-label">Телефон</label>
         {{ form.delivery_phone }}
+        {% if form.delivery_phone.errors %}
+            <div class="alert alert-danger mt-1">{{ form.delivery_phone.errors }}</div>
+        {% endif %}
     </div>
     <div class="mb-3">
         <label for="{{ form.delivery_date.id_for_label }}" class="form-label">Дата доставки</label>
         {{ form.delivery_date }}
+        {% if form.delivery_date.errors %}
+            <div class="alert alert-danger mt-1" id="delivery_date_error">
+                {{ form.delivery_date.errors }}
+            </div>
+        {% endif %}
     </div>
     <button type="submit" class="btn btn-success">Оформить заказ</button>
 </form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const deliveryDateInput = document.getElementById('{{ form.delivery_date.id_for_label }}');
+    const errorDiv = document.getElementById('delivery_date_error');
+    const form = document.getElementById('checkout-form');
+
+    // Проверяем, есть ли ошибка у поля даты при загрузке страницы
+    if (errorDiv && errorDiv.textContent.trim() !== '') {
+        // Показываем alert с сообщением об ошибке
+        alert("Ошибка: " + errorDiv.textContent.trim());
+        // Очищаем значение поля даты
+        deliveryDateInput.value = '';
+        // Фокус на поле для удобства
+        deliveryDateInput.focus();
+    }
+
+    // Также можно добавить проверку перед отправкой формы (на всякий случай)
+    form.addEventListener('submit', function(e) {
+        if (deliveryDateInput.value && new Date(deliveryDateInput.value) < new Date()) {
+            e.preventDefault(); // Останавливаем отправку
+            alert("Дата доставки не может быть в прошлом. Пожалуйста, выберите корректную дату.");
+            deliveryDateInput.value = ''; // Очищаем поле
+            deliveryDateInput.focus(); // Фокус на поле
+        }
+    });
+});
+</script>
 {% endblock %}

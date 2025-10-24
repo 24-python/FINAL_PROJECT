@@ -12,8 +12,9 @@
                 <p class="card-text">Адрес: {{ order.delivery_address }}</p>
                 <p class="card-text">Телефон: {{ order.delivery_phone }}</p>
                 <p class="card-text">Итого: {{ order.total_price }} ₽</p>
-                <a href="#" class="btn btn-primary me-2">Подробнее</a>
-                <!-- Кнопка "Повторить заказ" -->
+                <!-- --- Изменено: ссылка на детали заказа --- -->
+                <a href="{% url 'shop:order_detail' order.id %}" class="btn btn-primary me-2">Подробнее</a>
+                <!-- --- /Изменено --- -->
                 <a href="{% url 'shop:repeat_order' order.id %}" class="btn btn-secondary">Повторить заказ</a>
             </div>
         </div>

@@ -4,6 +4,7 @@ from .models import Product, Order, OrderItem, Review
 from .forms import OrderForm, ReviewForm
 from django.contrib import messages
 from decimal import Decimal
+from accounts.models import UserProfile
 
 def catalog(request):
     products = Product.objects.all()
@@ -71,6 +72,9 @@ def view_cart(request):
 
 @login_required
 def checkout(request):
+    # Получаем или создаем UserProfile для текущего пользователя
+    user_profile, created = UserProfile.objects.get_or_create(user=request.user)
+
     if request.method == 'POST':
         form = OrderForm(request.POST)
         if form.is_valid():
@@ -92,16 +96,24 @@ def checkout(request):
             messages.success(request, "Заказ успешно оформлен!")
             return redirect('shop:order_history')
     else:
+        # Используем безопасно полученный профиль
         form = OrderForm(initial={
-            'delivery_phone': getattr(request.user.userprofile, 'phone', ''),
-            'delivery_address': getattr(request.user.userprofile, 'address', ''),
+            'delivery_phone': getattr(user_profile, 'phone', ''),
+            'delivery_address': getattr(user_profile, 'address', ''),
         })
-    return render(request, 'shop:checkout.html', {'form': form})
+    return render(request, 'shop/checkout.html', {'form': form})
 
 @login_required
 def order_history(request):
     orders = Order.objects.filter(user=request.user).order_by('-created_at')
     return render(request, 'shop/order_history.html', {'orders': orders})
+
+# --- Новая функция для просмотра деталей заказа ---
+@login_required
+def order_detail(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    items = OrderItem.objects.filter(order=order)
+    return render(request, 'shop/order_detail.html', {'order': order, 'items': items})
 
 @login_required
 def repeat_order(request, order_id):

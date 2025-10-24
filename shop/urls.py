@@ -11,5 +11,7 @@ urlpatterns = [
     path('cart/', views.view_cart, name='cart'),
     path('checkout/', views.checkout, name='checkout'),
     path('orders/', views.order_history, name='order_history'),
+    # --- Новый маршрут ---
+    path('orders/<int:order_id>/', views.order_detail, name='order_detail'),
     path('repeat_order/<int:order_id>/', views.repeat_order, name='repeat_order'),
 ]

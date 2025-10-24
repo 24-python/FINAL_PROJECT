@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Детали заказа #{{ order.id }}</h2>
+<div class="card mb-3">
+    <div class="card-body">
+        <p class="card-text"><strong>Статус:</strong> {{ order.get_status_display }}</p>
+        <p class="card-text"><strong>Дата заказа:</strong> {{ order.created_at }}</p>
+        <p class="card-text"><strong>Адрес доставки:</strong> {{ order.delivery_address }}</p>
+        <p class="card-text"><strong>Телефон:</strong> {{ order.delivery_phone }}</p>
+        <p class="card-text"><strong>Дата доставки:</strong> {{ order.delivery_date }}</p>
+        <p class="card-text"><strong>Итого:</strong> {{ order.total_price }} ₽</p>
+    </div>
+</div>
+
+<h3>Товары в заказе:</h3>
+<ul class="list-group">
+    {% for item in items %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            {{ item.product.name }}
+            <span class="badge bg-primary rounded-pill">{{ item.quantity }} шт.</span>
+        </li>
+    {% endfor %}
+</ul>
+
+<a href="{% url 'shop:order_history' %}" class="btn btn-secondary mt-3">Назад к истории заказов</a>
+{% endblock %}
