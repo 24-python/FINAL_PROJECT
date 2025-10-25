@@ -1,30 +1,37 @@
 {% extends 'base.html' %}
 
+{% block title %}Каталог - {{ block.super }}{% endblock %}
 {% block content %}
-<h2>Каталог цветов</h2>
-<div class="row">
+<h2 class="mb-4">Каталог цветов</h2>
+<div class="row g-4">
     {% for product in products %}
-    <div class="col-md-4 mb-4">
-        <div class="card">
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
             {% if product.image %}
-                <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
             {% else %}
                 <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
                     <span>Нет изображения</span>
                 </div>
             {% endif %}
-            <div class="card-body">
+            <div class="card-body d-flex flex-column">
                 <h5 class="card-title">{{ product.name }}</h5>
-                <p class="card-text">{{ product.description|truncatewords:20 }}</p>
+                <p class="card-text flex-grow-1">{{ product.description|truncatewords:20 }}</p>
                 <p class="card-text"><strong>{{ product.price }} ₽</strong></p>
-                <a href="{% url 'shop:product_detail' product.pk %}" class="btn btn-primary">Подробнее</a>
-                <a href="{% url 'shop:add_to_cart' product.pk %}" class="btn btn-success me-1">В корзину</a>
-                <a href="{% url 'shop:quick_add_to_cart' product.pk %}" class="btn btn-warning">Быстрый заказ</a>
+                <div class="mt-auto">
+                    <a href="{% url 'shop:product_detail' product.pk %}" class="btn btn-primary w-100 mb-2">Подробнее</a>
+                    <div class="d-grid gap-2 d-md-block">
+                        <a href="{% url 'shop:add_to_cart' product.pk %}" class="btn btn-success me-1">В корзину</a>
+                        <a href="{% url 'shop:quick_add_to_cart' product.pk %}" class="btn btn-warning">Быстрый заказ</a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
     {% empty %}
-        <p>Нет доступных товаров.</p>
+        <div class="col-12">
+            <p class="text-center">Нет доступных товаров.</p>
+        </div>
     {% endfor %}
 </div>
 {% endblock %}

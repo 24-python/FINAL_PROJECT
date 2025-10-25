@@ -1,13 +1,30 @@
 {% extends 'base.html' %}
 
+{% block title %}Аналитика - {{ block.super }}{% endblock %}
 {% block content %}
-<h2>Панель аналитики</h2>
-<div class="row">
+<h2 class="mb-4">Панель аналитики</h2>
+<div class="row g-4">
     <div class="col-md-6">
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title">Общая выручка</h5>
-                <p class="card-text">{{ total_revenue }} ₽</p>
+                <p class="card-text display-6">{{ total_revenue }} ₽</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Общие расходы</h5>
+                <p class="card-text display-6">{{ total_expenses }} ₽</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Общая прибыль</h5>
+                <p class="card-text display-6">{{ net_profit }} ₽</p>
             </div>
         </div>
     </div>
@@ -15,9 +32,40 @@
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title">Новых заказов</h5>
-                <p class="card-text">{{ new_orders }}</p>
+                <p class="card-text display-6">{{ new_orders }}</p>
             </div>
         </div>
     </div>
+</div>
+
+<!-- Пример таблицы отчётов -->
+<h3 class="mt-4">Отчёты по дням</h3>
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Дата</th>
+                <th>Название</th>
+                <th>Выручка</th>
+                <th>Расходы</th>
+                <th>Прибыль</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for report in reports %}
+            <tr>
+                <td>{{ report.date }}</td>
+                <td>{{ report.name }}</td>
+                <td>{{ report.revenue }} ₽</td>
+                <td>{{ report.expenses }} ₽</td>
+                <td>{{ report.revenue|add:report.expenses|floatformat:2 }} ₽</td> <!-- Простой расчёт, учитывая расходы как отрицательные -->
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="text-center">Нет доступных отчётов.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endblock %}

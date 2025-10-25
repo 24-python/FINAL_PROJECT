@@ -1,33 +1,54 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
+<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
     <div class="container">
         <a class="navbar-brand" href="{% url 'shop:catalog' %}">Цветочная Лавка</a>
-        <div class="navbar-nav ms-auto">
-            <!-- Ссылка на корзину с иконкой и счетчиком -->
-            <a class="nav-link position-relative me-3" href="{% url 'shop:cart' %}">
-                🛒 <!-- Или используйте иконку из Bootstrap Icons: <i class="bi bi-cart"></i> -->
-                {% if cart_count > 0 %}
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                        {{ cart_count }}
-                        <span class="visually-hidden">товаров в корзине</span>
-                    </span>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+            <ul class="navbar-nav">
+                <!-- Ссылка на корзину с иконкой и счетчиком -->
+                <li class="nav-item">
+                    <a class="nav-link position-relative me-3" href="{% url 'shop:cart' %}">
+                        🛒
+                        {% if cart_count > 0 %}
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                {{ cart_count }}
+                                <span class="visually-hidden">товаров в корзине</span>
+                            </span>
+                        {% endif %}
+                    </a>
+                </li>
+                {% if user.is_authenticated %}
+                    <!-- --- Обернуто в nav-item --- -->
+                    <li class="nav-item">
+                        <span class="nav-link" style="cursor: default;"> <!-- Используем nav-link для выравнивания, стиль для отключения курсора -->
+                            Добро пожаловать, {% firstof user.first_name user.email user.username %}!
+                        </span>
+                    </li>
+                    <!-- --- /Обернуто в nav-item --- -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'accounts:profile' %}">Профиль</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'shop:order_history' %}">Мои заказы</a>
+                    </li>
+                    {% if user.is_superuser %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'admin:index' %}">Админка</a>
+                        </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'accounts:logout' %}">Выход</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'accounts:login' %}">Вход</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'accounts:register' %}">Регистрация</a>
+                    </li>
                 {% endif %}
-            </a>
-            {% if user.is_authenticated %}
-                <!-- --- Приветствие пользователя --- -->
-                <span class="navbar-text me-3">
-                    Добро пожаловать, {% firstof user.first_name user.email user.username %}!
-                </span>
-                <!-- --- /Приветствие пользователя --- -->
-                <a class="nav-link" href="{% url 'accounts:profile' %}">Профиль</a>
-                <a class="nav-link" href="{% url 'shop:order_history' %}">Мои заказы</a>
-                {% if user.is_superuser %}
-                    <a class="nav-link" href="{% url 'admin:index' %}">Админка</a>
-                {% endif %}
-                <a class="nav-link" href="{% url 'accounts:logout' %}">Выход</a>
-            {% else %}
-                <a class="nav-link" href="{% url 'accounts:login' %}">Вход</a>
-                <a class="nav-link" href="{% url 'accounts:register' %}">Регистрация</a>
-            {% endif %}
+            </ul>
         </div>
     </div>
 </nav>

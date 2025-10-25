@@ -1,25 +1,31 @@
 {% extends 'base.html' %}
 
+{% block title %}История заказов - {{ block.super }}{% endblock %}
 {% block content %}
-<h2>История заказов</h2>
+<h2 class="mb-4">История заказов</h2>
 {% if orders %}
     {% for order in orders %}
         <div class="card mb-3">
             <div class="card-body">
-                <h5 class="card-title">Заказ #{{ order.id }}</h5>
-                <p class="card-text">Статус: {{ order.get_status_display }}</p>
-                <p class="card-text">Дата: {{ order.created_at }}</p>
-                <p class="card-text">Адрес: {{ order.delivery_address }}</p>
-                <p class="card-text">Телефон: {{ order.delivery_phone }}</p>
-                <p class="card-text">Итого: {{ order.total_price }} ₽</p>
-                <!-- --- Изменено: ссылка на детали заказа --- -->
-                <a href="{% url 'shop:order_detail' order.id %}" class="btn btn-primary me-2">Подробнее</a>
-                <!-- --- /Изменено --- -->
-                <a href="{% url 'shop:repeat_order' order.id %}" class="btn btn-secondary">Повторить заказ</a>
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h5 class="card-title">Заказ #{{ order.id }}</h5>
+                        <p class="card-text">Статус: <span class="badge bg-info">{{ order.get_status_display }}</span></p>
+                        <p class="card-text">Статус оплаты: <span class="badge bg-info">{{ order.get_payment_status_display }}</span></p>
+                        <p class="card-text">Дата: {{ order.created_at }}</p>
+                        <p class="card-text">Адрес: {{ order.delivery_address }}</p>
+                        <p class="card-text">Телефон: {{ order.delivery_phone }}</p>
+                        <p class="card-text">Итого: {{ order.total_price }} ₽</p>
+                    </div>
+                    <div>
+                        <a href="{% url 'shop:order_detail' order.id %}" class="btn btn-primary btn-sm me-1">Подробнее</a>
+                        <a href="{% url 'shop:repeat_order' order.id %}" class="btn btn-secondary btn-sm">Повторить заказ</a>
+                    </div>
+                </div>
             </div>
         </div>
     {% endfor %}
 {% else %}
-    <p>У вас пока нет заказов.</p>
+    <p class="text-center">У вас пока нет заказов.</p>
 {% endif %}
 {% endblock %}

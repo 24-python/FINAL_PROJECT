@@ -1,42 +1,50 @@
 {% extends 'base.html' %}
 
+{% block title %}Корзина - {{ block.super }}{% endblock %}
 {% block content %}
-<h2>Ваша корзина</h2>
+<h2 class="mb-4">Ваша корзина</h2>
 {% if cart_items %}
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Товар</th>
-                <th>Количество</th>
-                <th>Цена</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in cart_items %}
-            <tr>
-                <td>{{ item.product.name }}</td>
-                <td>{{ item.quantity }}</td>
-                <td>{{ item.item_total }} ₽</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-        <tfoot>
-            <tr>
-                <th>Итого:</th>
-                <td></td>
-                <th>{{ total }} ₽</th>
-            </tr>
-        </tfoot>
-    </table>
-    <!-- --- НОВАЯ кнопка "Оплатить" --- -->
-    <form method="post" action="{% url 'shop:initiate_payment' %}">
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Товар</th>
+                    <th>Количество</th>
+                    <th>Цена за шт.</th>
+                    <th>Итого</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in cart_items %}
+                <tr>
+                    <td>{{ item.product.name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.product.price }} ₽</td>
+                    <td>{{ item.item_total }} ₽</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th colspan="3" class="text-end">Итого:</th>
+                    <th>{{ total }} ₽</th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    <div class="d-flex justify-content-between">
+        <a href="{% url 'shop:catalog' %}" class="btn btn-secondary">Продолжить покупки</a>
+        <a href="{% url 'shop:checkout' %}" class="btn btn-success">Оформить заказ</a>
+    </div>
+    <!-- Кнопка "Оплатить" из корзины -->
+    <form method="post" action="{% url 'shop:initiate_payment' %}" class="mt-3">
         {% csrf_token %}
-        <button type="submit" class="btn btn-success">Оплатить</button>
+        <button type="submit" class="btn btn-primary">Оплатить</button>
     </form>
-    <!-- --- /НОВАЯ кнопка "Оплатить" --- -->
-    <!-- Кнопка "Оформить заказ" остаётся, если хочется использовать старую логику -->
-    <a href="{% url 'shop:checkout' %}" class="btn btn-primary mt-2">Оформить заказ</a>
 {% else %}
-    <p>Ваша корзина пуста.</p>
+    <p class="text-center">Ваша корзина пуста.</p>
+    <div class="text-center">
+        <a href="{% url 'shop:catalog' %}" class="btn btn-primary">Перейти к каталогу</a>
+    </div>
 {% endif %}
 {% endblock %}
