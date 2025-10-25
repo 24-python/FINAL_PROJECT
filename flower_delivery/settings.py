@@ -86,11 +86,11 @@ EMAIL_HOST = 'smtp.yandex.ru'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 # Замените 'your_yandex_email@yandex.ru' на ваш реальный адрес
-EMAIL_HOST_USER = 'wotbotov@yandex.com'  # Ваш email на Yandex
+EMAIL_HOST_USER = 'wotbotov@yandex.ru'  # Ваш email на Yandex
 # Вместо обычного пароля используйте "Пароль приложения"
 # или "Специальный пароль" (в зависимости от настроек безопасности Yandex)
-EMAIL_HOST_PASSWORD = 'your_yandex_app_password' # Пароль приложения
-DEFAULT_FROM_EMAIL = 'your_yandex_email@yandex.ru'
+EMAIL_HOST_PASSWORD = 'ahdrzztzdsgaupzj' # Пароль приложения
+DEFAULT_FROM_EMAIL = 'otbotov@yandex.ru'
 # --- /EMAIL ---
 
 STATIC_URL = '/static/'

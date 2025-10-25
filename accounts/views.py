@@ -23,7 +23,10 @@ def register(request):
             profile = profile_form.save(commit=False)
             profile.user = user
             profile.save()
-            login(request, user)
+            # --- ИЗМЕНЕНО: указываем EmailBackend при login ---
+            # Так как аутентификация в приложении работает по email через EmailBackend
+            login(request, user, backend='accounts.backends.EmailBackend')
+            # --- /ИЗМЕНЕНО ---
             messages.success(request, "Регистрация прошла успешно!")
             return redirect('shop:catalog')
     else:

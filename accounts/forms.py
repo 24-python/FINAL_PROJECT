@@ -54,9 +54,10 @@ class UserProfileForm(forms.ModelForm):
     def save(self, commit=True):
         profile = super().save(commit=False)
         if self.user:
-            # Сохраняем first_name и last_name в User
+            # --- ИЗМЕНЕНО: получаем данные из self.cleaned_data формы ---
             self.user.first_name = self.cleaned_data.get("first_name", "")
-            self.user.last_name = self.user.cleaned_data.get("last_name", "")
+            self.user.last_name = self.cleaned_data.get("last_name", "")
+            # --- /ИЗМЕНЕНО ---
             if commit:
                 self.user.save()
         if commit:

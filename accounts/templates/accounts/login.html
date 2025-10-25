@@ -23,4 +23,11 @@
     {% endif %}
     <button type="submit" class="btn btn-primary">Войти</button>
 </form>
+
+<!-- --- Ссылка "Забыли пароль?" --- -->
+<div class="mt-3">
+    <a href="{% url 'accounts:password_reset' %}">Забыли пароль?</a>
+</div>
+<!-- --- /Ссылка "Забыли пароль?" --- -->
+
 {% endblock %}
