@@ -8,4 +8,3 @@ class AnalyticsConfig(AppConfig):
 
     def ready(self):
         import analytics.signals
-        
