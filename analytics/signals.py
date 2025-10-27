@@ -4,7 +4,6 @@ from django.dispatch import receiver
 from django.utils import timezone
 from shop.models import Order
 from .models import SalesReport
-# Изменяем путь импорта
 # from telegram_bot.notifications import send_new_order_notification, send_order_status_update_notification, run_async_notification
 
 @receiver(post_save, sender=Order)
@@ -23,7 +22,13 @@ def update_sales_report_and_notify_on_order_save(sender, instance, created, **kw
         # Отложенный импорт
         try:
             from telegram_bot.notifications import send_new_order_notification, run_async_notification
-            run_async_notification(send_new_order_notification(instance.id))
+            # run_async_notification - уже оборачивает корутину, но сама функция синхронна
+            # Вызов корутины должен быть асинхронным, но сигнал синхронный.
+            # Для сигналов, часто используют threading или Celery для асинхронных задач.
+            # Пока оставим как есть, но имейте в виду, что это блокирует выполнение сигнала.
+            # Лучше использовать Celery.
+            # asyncio.run(send_new_order_notification(instance.id)) # Это НЕЛЬЗЯ в синхронном контексте.
+            run_async_notification(send_new_order_notification(instance.id)) # run_async_notification сам оборачивает в sync_to_async
         except ImportError:
             # Логгируем ошибку или просто игнорируем, если бот не настроен
             print("Модуль telegram_bot не найден. Уведомление о новом заказе не отправлено.")
@@ -51,7 +56,7 @@ def notify_status_change(sender, instance, **kwargs):
                 # Отложенный импорт
                 try:
                     from telegram_bot.notifications import send_order_status_update_notification, run_async_notification
-                    run_async_notification(send_order_status_update_notification(instance.id, old_status_display, new_status_display))
+                    run_async_notification(send_order_status_update_notification(instance.id, old_status_display, new_status_display)) # run_async_notification сам оборачивает в sync_to_async
                 except ImportError:
                     # Логгируем ошибку или просто игнорируем, если бот не настроен
                     print("Модуль telegram_bot не найден. Уведомление о смене статуса не отправлено.")

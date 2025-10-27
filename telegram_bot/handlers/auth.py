@@ -1,22 +1,28 @@
 # telegram_bot/handlers/auth.py
 from aiogram import Router
-from aiogram.types import Message
+from aiogram.types import Message # Добавлен импорт
 from aiogram.fsm.context import FSMContext
 from aiogram.filters import StateFilter
-from telegram_bot.utils import get_user_by_email, generate_token, send_auth_token_to_email, link_telegram_user_to_django, is_user_admin, check_pending_consent
+from telegram_bot.utils import get_user_by_email_sync, generate_token, send_auth_token_to_email, link_telegram_user_to_django_sync, is_user_admin, check_pending_consent_sync
 from telegram_bot.keyboards import get_main_user_keyboard, get_main_admin_keyboard
 from telegram_bot.states import AuthStates
 from accounts.models import PendingTelegramConsent, UserProfile
 from django.utils import timezone
+# --- ИМПОРТ ДЛЯ АСИНХРОННОСТИ ---
+from asgiref.sync import sync_to_async
+# --- /ИМПОРТ ДЛЯ АСИНХРОННОСТИ ---
+
+# Не забудьте импортировать has_agreed_to_pdn_sync в этом файле
+from telegram_bot.utils import has_agreed_to_pdn_sync
 
 router = Router()
 
 @router.message(StateFilter(None), lambda message: message.text == "✉️ Авторизоваться по email")
 async def prompt_email(message: Message, state: FSMContext):
-     # Проверим согласие через PendingTelegramConsent или UserProfile
+     # Проверим согласие через PendingTelegramConsent или UserProfile - используем асинхронные версии
      telegram_id = message.from_user.id
-     profile_agreed = has_agreed_to_pdn(telegram_id) # Импортируем из utils
-     pending_consent = check_pending_consent(telegram_id) # Импортируем из utils
+     profile_agreed = await has_agreed_to_pdn_sync(telegram_id) # Предполагаем, что has_agreed_to_pdn_sync импортирована
+     pending_consent = await check_pending_consent_sync(telegram_id)
 
      if not profile_agreed and not pending_consent:
          await message.answer("Пожалуйста, сначала подтвердите согласие на обработку ПДн.")
@@ -32,7 +38,7 @@ async def process_email(message: Message, state: FSMContext):
         await message.answer("Пожалуйста, введите корректный email адрес.")
         return
 
-    user = get_user_by_email(email)
+    user = await get_user_by_email_sync(email) # Вызов асинхронной функции
     if not user:
         await message.answer("Пользователь с таким email не найден.")
         return
@@ -40,18 +46,18 @@ async def process_email(message: Message, state: FSMContext):
     telegram_id = message.from_user.id
 
     # Проверяем, было ли согласие через PendingTelegramConsent
-    consent_record = PendingTelegramConsent.objects.filter(telegram_id=telegram_id, processed=False).first()
+    consent_record = await sync_to_async(PendingTelegramConsent.objects.filter(telegram_id=telegram_id, processed=False).first)()
     if consent_record:
-        # Обновляем флаг в профиле
-        profile, created = UserProfile.objects.get_or_create(user=user)
+        # Обновляем флаг в профиле - используем sync_to_async
+        profile, created = await sync_to_async(UserProfile.objects.get_or_create)(user=user)
         profile.telegram_agreed_to_pdn = True
-        profile.save()
+        await sync_to_async(profile.save)()
         consent_record.processed = True
-        consent_record.save()
+        await sync_to_async(consent_record.save)()
     else:
         # Проверяем, есть ли согласие в профиле (означает, что согласие было дано на сайте)
         try:
-            profile = UserProfile.objects.get(user=user)
+            profile = await sync_to_async(UserProfile.objects.get)(user=user)
             if not profile.telegram_agreed_to_pdn:
                  await message.answer("Вы не дали согласия на обработку ПДн для Telegram. Пожалуйста, дайте согласие в вашем профиле на сайте.")
                  return
@@ -85,11 +91,11 @@ async def process_token(message: Message, state: FSMContext):
         # Можно добавить ограничение на количество попыток
         return
 
-    # Находим пользователя и связываем с Telegram
+    # Находим пользователя и связываем с Telegram - используем асинхронную версию
     try:
-        user = User.objects.get(id=user_id)
+        user = await sync_to_async(User.objects.get)(id=user_id)
         telegram_id = message.from_user.id
-        link_telegram_user_to_django(telegram_id, user)
+        await link_telegram_user_to_django_sync(telegram_id, user) # Вызов асинхронной функции
 
         # Приветствие и главная клавиатура
         if is_user_admin(user):

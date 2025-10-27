@@ -4,6 +4,9 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.conf import settings
 from accounts.models import UserProfile, PendingTelegramConsent
+# --- ИМПОРТ ДЛЯ АСИНХРОННОСТИ ---
+from asgiref.sync import sync_to_async
+# --- /ИМПОРТ ДЛЯ АСИНХРОННОСТИ ---
 
 def generate_token():
     """Генерирует случайный 6-значный токен."""
@@ -24,6 +27,7 @@ def send_auth_token_to_email(email, token):
         print(f"Ошибка отправки email: {e}")
         return False
 
+# --- ОРИГИНАЛЬНЫЕ ФУНКЦИИ СНАЧАЛА ---
 def get_user_by_email(email):
     """Находит пользователя Django по email."""
     try:
@@ -58,9 +62,15 @@ def get_user_by_telegram_id(telegram_id):
 def has_agreed_to_pdn(telegram_id):
     """Проверяет, дал ли пользователь согласие на ПДн (через флаг в профиле)."""
     try:
+        # Пытаемся найти профиль по telegram_id
         profile = UserProfile.objects.get(telegram_id=telegram_id)
+        # Если профиль найден, возвращаем значение флага telegram_agreed_to_pdn
         return profile.telegram_agreed_to_pdn
     except UserProfile.DoesNotExist:
+        # Если профиль не найден, значит пользователь еще не связывал аккаунты.
+        # В этом случае он не может быть авторизован через бота и, следовательно,
+        # не мог дать согласие через бота или сайт (если согласие дается в профиле сайта).
+        # Возвращаем False.
         return False
 
 def check_pending_consent(telegram_id):
@@ -70,3 +80,12 @@ def check_pending_consent(telegram_id):
         return True
     except PendingTelegramConsent.DoesNotExist:
         return False
+# --- /ОРИГИНАЛЬНЫЕ ФУНКЦИИ ---
+
+# --- ОБЕРТКИ sync_to_async ПОСЛЕ ОПРЕДЕЛЕНИЯ ФУНКЦИЙ ---
+get_user_by_email_sync = sync_to_async(get_user_by_email)
+link_telegram_user_to_django_sync = sync_to_async(link_telegram_user_to_django)
+get_user_by_telegram_id_sync = sync_to_async(get_user_by_telegram_id)
+has_agreed_to_pdn_sync = sync_to_async(has_agreed_to_pdn)
+check_pending_consent_sync = sync_to_async(check_pending_consent)
+# --- /ОБЕРТКИ sync_to_async ---

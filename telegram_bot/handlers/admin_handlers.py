@@ -1,31 +1,35 @@
 # telegram_bot/handlers/admin_handlers.py
-from aiogram import Router, types
+from aiogram import Router
+from aiogram.types import Message, CallbackQuery # Добавлены импорты
 from aiogram.filters import Command
-from telegram_bot.utils import get_user_by_telegram_id, is_user_admin
+from telegram_bot.utils import get_user_by_telegram_id_sync, is_user_admin
 from shop.models import Order, OrderItem
 from telegram_bot.keyboards import get_order_status_keyboard
-from aiogram.types import CallbackQuery
+# --- ИМПОРТ ДЛЯ АСИНХРОННОСТИ ---
+from asgiref.sync import sync_to_async
+# --- /ИМПОРТ ДЛЯ АСИНХРОННОСТИ ---
 
 router = Router()
 
 @router.message(lambda message: message.text == "Новые заказы")
 async def show_new_orders(message: Message):
     telegram_id = message.from_user.id
-    user = get_user_by_telegram_id(telegram_id)
+    user = await get_user_by_telegram_id_sync(telegram_id) # Вызов асинхронной функции
 
     if not user or not is_user_admin(user):
         await message.answer("У вас нет прав для просмотра новых заказов.")
         return
 
-    # Показываем заказы со статусом 'new'
-    orders = Order.objects.filter(status='new').order_by('-created_at')
+    # Показываем заказы со статусом 'new' - синхронная операция, оборачиваем
+    orders = await sync_to_async(list)(Order.objects.filter(status='new').order_by('-created_at'))
 
     if not orders:
         await message.answer("Нет новых заказов.")
         return
 
     for order in orders:
-        items = OrderItem.objects.filter(order=order)
+        # Получаем OrderItem - синхронная операция, оборачиваем
+        items = await sync_to_async(list)(OrderItem.objects.filter(order=order))
         items_str = "\n".join([f"- {item.product.name} x{item.quantity}" for item in items])
         order_info = (
             f"Новый Заказ #{order.id}\n"
@@ -45,7 +49,7 @@ async def show_new_orders(message: Message):
 @router.callback_query(lambda c: c.data.startswith('status_'))
 async def process_status_callback(callback_query: CallbackQuery):
     telegram_id = callback_query.from_user.id
-    user = get_user_by_telegram_id(telegram_id)
+    user = await get_user_by_telegram_id_sync(telegram_id) # Вызов асинхронной функции
 
     if not user or not is_user_admin(user):
         await callback_query.answer("У вас нет прав для изменения статуса.", show_alert=True)
@@ -60,13 +64,16 @@ async def process_status_callback(callback_query: CallbackQuery):
         return
 
     try:
-        order = Order.objects.get(id=order_id)
+        # Получаем заказ - синхронная операция, оборачиваем
+        order = await sync_to_async(Order.objects.get)(id=order_id)
         old_status = order.get_status_display()
         order.status = new_status
-        order.save()
+        # Сохраняем заказ - синхронная операция, оборачиваем
+        await sync_to_async(order.save)()
         await callback_query.answer(f"Статус заказа #{order_id} изменён с '{old_status}' на '{order.get_status_display()}'.")
         # Обновляем сообщение с заказом
-        items = OrderItem.objects.filter(order=order)
+        # Получаем OrderItem - синхронная операция, оборачиваем
+        items = await sync_to_async(list)(OrderItem.objects.filter(order=order))
         items_str = "\n".join([f"- {item.product.name} x{item.quantity}" for item in items])
         order_info = (
             f"Заказ #{order.id} - Обновлен\n"
@@ -86,7 +93,7 @@ async def process_status_callback(callback_query: CallbackQuery):
 @router.callback_query(lambda c: c.data.startswith('pay_status_'))
 async def process_payment_status_callback(callback_query: CallbackQuery):
     telegram_id = callback_query.from_user.id
-    user = get_user_by_telegram_id(telegram_id)
+    user = await get_user_by_telegram_id_sync(telegram_id) # Вызов асинхронной функции
 
     if not user or not is_user_admin(user):
         await callback_query.answer("У вас нет прав для изменения статуса оплаты.", show_alert=True)
@@ -100,13 +107,16 @@ async def process_payment_status_callback(callback_query: CallbackQuery):
         return
 
     try:
-        order = Order.objects.get(id=order_id)
+        # Получаем заказ - синхронная операция, оборачиваем
+        order = await sync_to_async(Order.objects.get)(id=order_id)
         old_p_status = order.get_payment_status_display()
         order.payment_status = new_p_status
-        order.save()
+        # Сохраняем заказ - синхронная операция, оборачиваем
+        await sync_to_async(order.save)()
         await callback_query.answer(f"Статус оплаты заказа #{order_id} изменён с '{old_p_status}' на '{order.get_payment_status_display()}'.")
         # Обновляем сообщение аналогично статусу
-        items = OrderItem.objects.filter(order=order)
+        # Получаем OrderItem - синхронная операция, оборачиваем
+        items = await sync_to_async(list)(OrderItem.objects.filter(order=order))
         items_str = "\n".join([f"- {item.product.name} x{item.quantity}" for item in items])
         order_info = (
             f"Заказ #{order.id} - Обновлен\n"
