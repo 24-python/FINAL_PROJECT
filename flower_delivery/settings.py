@@ -121,3 +121,7 @@ LOGGING = {
         },
     },
 }
+
+# --- TELEGRAM BOT ---
+TELEGRAM_BOT_TOKEN = '8264560601:AAG952YYowv9_NFEwdNfVSvfqTfuuYjBQ9M' # Замените на реальный токен
+# --- /TELEGRAM BOT ---
