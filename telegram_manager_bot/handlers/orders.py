@@ -29,6 +29,13 @@ async def cmd_orders(message: types.Message):
 
 @router.callback_query(lambda c: c.data.startswith('m_view_order_'))
 async def process_view_order_callback(callback_query: types.CallbackQuery):
+    telegram_id = callback_query.from_user.id
+    user = await get_user_by_telegram_id_sync(telegram_id)
+
+    if not user or not is_user_manager(user):
+        await callback_query.answer("У вас нет прав для просмотра заказов.", show_alert=True)
+        return
+
     order_id_str = callback_query.data.split('_', 2)[-1]
     try:
         order_id = int(order_id_str)
@@ -64,7 +71,7 @@ async def process_back_to_orders_callback(callback_query: types.CallbackQuery):
     user = await get_user_by_telegram_id_sync(telegram_id)
 
     if not user or not is_user_manager(user):
-        await callback_query.answer("У вас нет прав для просмотра заказов.")
+        await callback_query.answer("У вас нет прав для просмотра заказов.", show_alert=True)
         return
 
     orders = await sync_to_async(list)(Order.objects.filter(status='new').order_by('-created_at'))
@@ -84,7 +91,7 @@ async def process_refresh_orders_callback(callback_query: types.CallbackQuery):
     user = await get_user_by_telegram_id_sync(telegram_id)
 
     if not user or not is_user_manager(user):
-        await callback_query.answer("У вас нет прав для просмотра заказов.")
+        await callback_query.answer("У вас нет прав для просмотра заказов.", show_alert=True)
         return
 
     orders = await sync_to_async(list)(Order.objects.filter(status='new').order_by('-created_at'))

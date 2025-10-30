@@ -5,6 +5,7 @@ from telegram_manager_bot.utils import get_managers_telegram_ids_sync, get_order
 from telegram_manager_bot.keyboards import get_order_details_keyboard
 import asyncio
 from asgiref.sync import sync_to_async
+import os
 
 bot = Bot(token=settings.TELEGRAM_MANAGER_BOT_TOKEN)
 
@@ -37,12 +38,18 @@ async def send_new_order_to_managers(order_id):
 
     for tg_id in manager_ids:
         try:
+            # Отправка изображений (если есть)
             for img_path in details['image_paths']:
-                try:
-                    with open(img_path, 'rb') as image_file:
-                        await bot.send_photo(chat_id=tg_id, photo=image_file)
-                except Exception as e:
-                    print(f"Ошибка отправки изображения {img_path} менеджеру {tg_id}: {e}")
+                # Проверяем, существует ли файл
+                if os.path.isfile(img_path):
+                    try:
+                        with open(img_path, 'rb') as image_file:
+                            await bot.send_photo(chat_id=tg_id, photo=image_file)
+                    except Exception as e:
+                        print(f"Ошибка отправки изображения {img_path} менеджеру {tg_id}: {e}")
+                else:
+                    print(f"Файл изображения не найден: {img_path}")
+            # Отправка текста с клавиатурой
             await bot.send_message(chat_id=tg_id, text=order_info, reply_markup=keyboard)
         except Exception as e:
             print(f"Ошибка отправки уведомления менеджеру {tg_id}: {e}")
