@@ -1,3 +1,4 @@
+# shop/views.py
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Product, Order, OrderItem, Review
@@ -173,11 +174,24 @@ def checkout(request):
             order.total_price = total
             # Устанавливаем статус оплаты при создании через checkout
             order.payment_status = 'pending' # или 'paid', если оплата сразу
-            order.save()
+            order.save() # <-- Сохраняем Order, но сигнал post_save НЕ вызывает уведомление
 
+            # --- ЦИКЛ СОЗДАНИЯ OrderItem ---
             for pk, qty in cart.items():
                 product = Product.objects.get(pk=int(pk))
                 OrderItem.objects.create(order=order, product=product, quantity=qty)
+            # --- /ЦИКЛ СОЗДАНИЯ OrderItem ---
+
+            # --- ОТПРАВКА УВЕДОМЛЕНИЯ ---
+            # Вызываем уведомление ВРУЧНУЮ ПОСЛЕ создания всех OrderItem
+            # Импортируем здесь, чтобы избежать циклических импортов при старте Django
+            try:
+                from telegram_manager_bot.notifications import send_new_order_to_managers, run_async_notification
+                run_async_notification(send_new_order_to_managers(order.id))
+            except ImportError:
+                # Логгируем ошибку или просто игнорируем, если бот не настроен
+                print("Модуль telegram_manager_bot не найден. Уведомление о новом заказе не отправлено.")
+            # --- /ОТПРАВКА УВЕДОМЛЕНИЯ ---
 
             request.session['cart'] = {}
             messages.success(request, "Заказ успешно оформлен!")

@@ -1,10 +1,13 @@
 # telegram_manager_bot/utils.py
 from django.contrib.auth.models import User
 from accounts.models import UserProfile
+# --- ИМПОРТ sync_to_async ДОЛЖЕН БЫТЬ ЗДЕСЬ ---
 from asgiref.sync import sync_to_async
+# --- /ИМПОРТ sync_to_async ---
 from shop.models import Order, OrderItem, Product
+import os # <-- Импортируем os для проверки существования файла
 
-# --- Синхронные функции ---
+# --- Синхронные функции СНАЧАЛА ---
 def get_user_by_telegram_id(telegram_id):
     """Находит пользователя Django по manager_telegram_id."""
     try:
@@ -38,15 +41,24 @@ def get_user_by_email(email):
 def get_order_details(order_id):
     """Получает детали заказа для уведомления."""
     try:
-        order = Order.objects.get(id=order_id)
-        items = OrderItem.objects.filter(order=order).select_related('product')
+        # --- ИЗМЕНЕНИЕ: Используем prefetch_related для получения OrderItem ---
+        order = Order.objects.prefetch_related('orderitem_set__product').get(id=order_id)
+        # items = OrderItem.objects.filter(order=order).select_related('product') # <-- Старый способ
+        items = order.orderitem_set.all() # <-- Используем обратную связь
+        # --- /ИЗМЕНЕНИЕ ---
+
         products_info = []
         images = []
         for item in items:
             product = item.product
             products_info.append(f"{product.name} x{item.quantity}")
             if product.image: # Предполагаем, что image - это главное фото
-                images.append(product.image.path) # Или .url для URL
+                img_path = product.image.path
+                # --- ОТЛАДОЧНЫЙ ПРИНТ ---
+                print(f"[DEBUG utils.py] Путь к изображению для {product.name}: {img_path}")
+                print(f"[DEBUG utils.py] Файл существует: {os.path.isfile(img_path)}")
+                # --- /ОТЛАДОЧНЫЙ ПРИНТ ---
+                images.append(img_path)
         order_info = {
             'id': order.id,
             'user': order.user.username,
@@ -69,11 +81,11 @@ def is_user_manager(django_user):
     return django_user.is_superuser
 # --- /Синхронные функции ---
 
-# --- ОБЕРТКИ sync_to_async ---
+# --- ОБЕРТКИ sync_to_async ПОСЛЕ ОПРЕДЕЛЕНИЯ ФУНКЦИЙ ---
 get_user_by_telegram_id_sync = sync_to_async(get_user_by_telegram_id)
 get_managers_telegram_ids_sync = sync_to_async(get_managers_telegram_ids)
 link_manager_telegram_id_sync = sync_to_async(link_manager_telegram_id)
 get_user_by_email_sync = sync_to_async(get_user_by_email)
-get_order_details_sync = sync_to_async(get_order_details)
+get_order_details_sync = sync_to_async(get_order_details) # <-- Убедитесь, что это есть
 is_user_manager_sync = sync_to_async(is_user_manager)
 # --- /ОБЕРТКИ sync_to_async ---

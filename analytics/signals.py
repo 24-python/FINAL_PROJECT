@@ -4,7 +4,9 @@ from django.dispatch import receiver
 from django.utils import timezone
 from shop.models import Order
 from .models import SalesReport
-from telegram_manager_bot.notifications import send_new_order_to_managers, run_async_notification
+# --- УБИРАЕМ ИМПОРТ УВЕДОМЛЕНИЯ ---
+# from telegram_manager_bot.notifications import send_new_order_to_managers, run_async_notification
+# --- /УБИРАЕМ ИМПОРТ УВЕДОМЛЕНИЯ ---
 
 @receiver(post_save, sender=Order)
 def update_sales_report_and_notify_on_order_save(sender, instance, created, **kwargs):
@@ -17,6 +19,6 @@ def update_sales_report_and_notify_on_order_save(sender, instance, created, **kw
         report.orders.add(instance)
         report.update_report()
 
-        # --- НОВОЕ: Уведомление менеджерам ---
-        run_async_notification(send_new_order_to_managers(instance.id))
-        # --- /НОВОЕ ---
+        # --- УБИРАЕМ ВЫЗОВ УВЕДОМЛЕНИЯ ---
+        # run_async_notification(send_new_order_to_managers(instance.id))
+        # --- /УБИРАЕМ ВЫЗОВ УВЕДОМЛЕНИЯ ---
