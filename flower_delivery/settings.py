@@ -80,18 +80,31 @@ USE_I18N = True  # <-- Включено для поддержки перевод
 USE_TZ = True
 # --- /ЯЗЫК И ВРЕМЕННАЯ ЗОНА ---
 
-# --- EMAIL (Yandex) ---
+# # --- EMAIL (Yandex) ---
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.yandex.ru'
+# EMAIL_PORT = 587
+# #EMAIL_USE_TLS = True
+# # Замените 'your_yandex_email@yandex.ru' на ваш реальный адрес
+# EMAIL_HOST_USER = 'wotbotov@yandex.ru'  # Ваш email на Yandex
+# # Вместо обычного пароля используйте "Пароль приложения"
+# # или "Специальный пароль" (в зависимости от настроек безопасности Yandex)
+# EMAIL_HOST_PASSWORD = 'ahdrzztzdsgaupzj' # Пароль приложения
+# DEFAULT_FROM_EMAIL = 'wotbotov@yandex.ru'
+# # --- /EMAIL ---
+
+# --- EMAIL (Mail.Ru) ---
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.yandex.ru'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-# Замените 'your_yandex_email@yandex.ru' на ваш реальный адрес
-EMAIL_HOST_USER = 'wotbotov@yandex.ru'  # Ваш email на Yandex
-# Вместо обычного пароля используйте "Пароль приложения"
-# или "Специальный пароль" (в зависимости от настроек безопасности Yandex)
-EMAIL_HOST_PASSWORD = 'ahdrzztzdsgaupzj' # Пароль приложения
-DEFAULT_FROM_EMAIL = 'otbotov@yandex.ru'
-# --- /EMAIL ---
+EMAIL_HOST = 'smtp.mail.ru'
+EMAIL_PORT = 465  # Используется для SSL
+EMAIL_USE_TLS = False # Выключаем TLS, так как используем SSL
+EMAIL_USE_SSL = True  # Включаем SSL
+# Замените 'your_mailru_email@mail.ru' на ваш реальный адрес на mail.ru
+EMAIL_HOST_USER = '24_python@mail.ru'  # Ваш email на Mail.Ru
+# Замените 'your_mailru_app_password' на *пароль приложения* или ваш основной пароль (не рекомендуется)
+EMAIL_HOST_PASSWORD = '70TNfT4JPkkjY1xeaQBO' # Пароль приложения или основной пароль
+DEFAULT_FROM_EMAIL = '24_python@mail.ru' # От какого адреса будут отправляться письма
+# --- /EMAIL (Mail.Ru) ---
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
@@ -124,4 +137,5 @@ LOGGING = {
 
 # --- TELEGRAM BOT ---
 TELEGRAM_BOT_TOKEN = '8264560601:AAG952YYowv9_NFEwdNfVSvfqTfuuYjBQ9M' # Замените на реальный токен
+TELEGRAM_MANAGER_BOT_TOKEN = '8253880822:AAHG9xrZlljOw0TTErZKivMDe4mtp1HH3c4' # Токен второго бота
 # --- /TELEGRAM BOT ---
