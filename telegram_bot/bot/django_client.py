@@ -1,9 +1,12 @@
-# telegram_bot/bot/django_client.py
+# telegram_bot/bot/django_client.py (добавляем в начало)
 import os
 import django
 import sys
 from typing import Optional, Dict, List
-from asgiref.sync import sync_to_async  # Добавляем импорт
+from asgiref.sync import sync_to_async
+from pathlib import Path  # Добавляем этот импорт
+
+
 
 # Добавляем путь к Django проекту
 DJANGO_PROJECT_PATH = os.path.join(os.path.dirname(__file__), '../../')
@@ -120,11 +123,17 @@ class DjangoClient:
 
                 # Добавляем товары
                 for item in order.orderitem_set.all():
+                    image_path = None
+                    if item.product.image:
+                        image_path = item.product.image.path
+                        print(f"📁 Путь к изображению: {image_path}")
+                        print(f"📁 Существует файл: {Path(image_path).exists()}")
+
                     product_data = {
                         'name': item.product.name,
                         'quantity': item.quantity,
                         'price': item.product.price,
-                        'image_path': item.product.image.path if item.product.image else None
+                        'image_path': image_path
                     }
                     order_data['products'].append(product_data)
 

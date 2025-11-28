@@ -9,16 +9,24 @@ class ImageProcessor:
     """Обработчик изображений для Telegram"""
 
     @staticmethod
-    def prepare_image_for_telegram(image_path: Path) -> io.BytesIO:
+    def prepare_image_for_telegram(image_path) -> io.BytesIO:
         """
         Подготавливает изображение для отправки в Telegram
         Сжимает и конвертирует в подходящий формат
         """
         try:
-            if not image_path or not image_path.exists():
+            if not image_path:
+                print("❌ Путь к изображению не указан")
                 return None
 
-            with Image.open(image_path) as img:
+            path = Path(image_path)
+            if not path.exists():
+                print(f"❌ Файл изображения не найден: {image_path}")
+                return None
+
+            print(f"🖼️  Обрабатываем изображение: {path}")
+
+            with Image.open(path) as img:
                 # Конвертируем в RGB если нужно
                 if img.mode in ('RGBA', 'P'):
                     img = img.convert('RGB')
@@ -32,6 +40,7 @@ class ImageProcessor:
                 img.save(buffer, format='JPEG', quality=85, optimize=True)
                 buffer.seek(0)
 
+                print(f"✅ Изображение подготовлено: {buffer.getbuffer().nbytes} байт")
                 return buffer
 
         except Exception as e:
@@ -46,6 +55,7 @@ class ImageProcessor:
         try:
             image_dir = BotConfig.PRODUCTS_IMAGE_DIR
             if not image_dir.exists():
+                print(f"❌ Директория с изображениями не найдена: {image_dir}")
                 return None
 
             # Ищем файл по имени продукта (упрощенная логика)
@@ -56,7 +66,11 @@ class ImageProcessor:
 
             # Если не нашли по имени, берем первое изображение из директории
             images = list(image_dir.glob('*'))
-            return images[0] if images else None
+            if images:
+                return images[0]
+            else:
+                print(f"❌ В директории нет изображений: {image_dir}")
+                return None
 
         except Exception as e:
             print(f"❌ Error finding product image: {e}")

@@ -4,6 +4,7 @@ from telegram.ext import ContextTypes, CommandHandler, MessageHandler, filters
 from bot.config import BotConfig
 from bot.django_client import DjangoClient
 from bot.utils import MessageFormatter
+from pathlib import Path  # Добавляем импорт
 
 
 class BotHandlers:
@@ -43,7 +44,7 @@ class BotHandlers:
         else:
             await update.message.reply_text("❌ Ошибка при сохранении данных")
 
-    async def send_order_notification(self, order_data: dict, image_buffer=None):
+    async def send_order_notification(self, order_data: dict):
         """Отправляет уведомление о заказе всем администраторам"""
         try:
             from telegram import Bot
@@ -56,33 +57,47 @@ class BotHandlers:
 
             message_text = self.message_formatter.format_order_message(order_data)
 
-            for chat_id in admin_chat_ids:
-                try:
-                    if image_buffer and order_data['products']:
-                        # Отправляем с изображением
-                        first_product = order_data['products'][0]
-                        if first_product.get('image_path'):
-                            image_buffer = ImageProcessor.prepare_image_for_telegram(
-                                first_product['image_path']
-                            )
-                            if image_buffer:
-                                await bot.send_photo(
-                                    chat_id=chat_id,
-                                    photo=image_buffer,
-                                    caption=message_text,
-                                    parse_mode='Markdown'
-                                )
-                                continue
-
-                    # Отправляем без изображения
-                    await bot.send_message(
-                        chat_id=chat_id,
-                        text=message_text,
-                        parse_mode='Markdown'
+            # Пытаемся получить изображение первого товара
+            image_buffer = None
+            if order_data['products']:
+                first_product = order_data['products'][0]
+                if first_product.get('image_path'):
+                    print(f"🖼️  Пытаемся загрузить изображение: {first_product['image_path']}")
+                    image_buffer = ImageProcessor.prepare_image_for_telegram(
+                        first_product['image_path']
                     )
 
+            for chat_id in admin_chat_ids:
+                try:
+                    if image_buffer:
+                        print(f"📤 Отправляем фото для заказа #{order_data['id']} в чат {chat_id}")
+                        # Важно: создаем новый buffer для каждого отправления
+                        image_buffer.seek(0)  # Сбрасываем позицию буфера
+                        await bot.send_photo(
+                            chat_id=chat_id,
+                            photo=image_buffer,
+                            caption=message_text,
+                            parse_mode='Markdown'
+                        )
+                    else:
+                        print(f"📤 Отправляем текстовое сообщение для заказа #{order_data['id']} в чат {chat_id}")
+                        await bot.send_message(
+                            chat_id=chat_id,
+                            text=message_text,
+                            parse_mode='Markdown'
+                        )
+
                 except Exception as e:
-                    print(f"❌ Error sending to chat {chat_id}: {e}")
+                    print(f"❌ Ошибка отправки в чат {chat_id}: {e}")
+                    # Пробуем отправить без изображения при ошибке
+                    try:
+                        await bot.send_message(
+                            chat_id=chat_id,
+                            text=message_text,
+                            parse_mode='Markdown'
+                        )
+                    except Exception as e2:
+                        print(f"❌ Критическая ошибка отправки в чат {chat_id}: {e2}")
 
         except Exception as e:
             print(f"❌ Error in send_order_notification: {e}")
